@@ -1,8 +1,30 @@
-# OS files
+# Bedrock
+/web/app/uploads/*
+!web/app/uploads/.gitkeep
+/web/app/upgrade/
+/web/app/mu-plugins/bedrock-disallow-indexing/
+/web/app/plugins/*
+!web/app/plugins/newsroom-speed-cache/
+!web/app/plugins/newspack-local-esps/
+!web/app/plugins/newsroom-image-downloader/
+!web/app/plugins/newpack-discord-bot-api/
+/web/app/themes/*
+/web/wp/
+
+# Environment
+.env
+.env.*.php
+.env.production
+!.env.example
+
+# Composer
+/vendor/
+
+# OS
 .DS_Store
 Thumbs.db
 
-# IDE files
+# IDE
 .vscode/
 .idea/
 *.swp
@@ -12,11 +34,7 @@ Thumbs.db
 node_modules/
 npm-debug.log
 
-# Discord bot state
+# Discord bot
 discord-bot/bot-state.json
 discord-bot/.env
-
-# WordPress
-wp-config.php
-wp-content/uploads/
 
