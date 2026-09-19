@@ -6,17 +6,27 @@
  * License: MIT
  */
 
-defined('ABSPATH') || exit;
+use Roots\Acorn\Application;
 
-add_action('after_setup_theme', static function (): void {
-    if (!function_exists('\Roots\bootloader')) {
-        return;
-    }
-    try {
-        \Roots\bootloader()->boot();
-    } catch (\Throwable $e) {
-        if (defined('WP_DEBUG') && WP_DEBUG) {
-            error_log('Acorn boot failed: ' . $e->getMessage());
+add_action(
+    'after_setup_theme',
+    static function (): void {
+        if (!class_exists(Application::class)) {
+            return;
         }
-    }
-});
+
+        if (function_exists('\\Roots\\app')) {
+            try {
+                \Roots\app();
+                return;
+            } catch (\Throwable $e) {
+                unset($e);
+            }
+        }
+
+        Application::configure()
+            ->withRouting(wordpress: true)
+            ->boot();
+    },
+    0
+);
