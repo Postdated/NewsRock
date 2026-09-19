@@ -1,0 +1,15 @@
+# Plugin archives (too large for monorepo)
+*.zip
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Dependencies
+node_modules/
+vendor/
+
