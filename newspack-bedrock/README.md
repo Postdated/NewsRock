@@ -29,9 +29,11 @@ Gutenberg blocks from `newspack-blocks` ship compiled `dist/` assets and `block.
 
 ## Install
 
+This product lives in the [NewsRock](https://github.com/Postdated/NewsRock) monorepo.
+
 ```bash
-git clone https://github.com/Postdated/Newspack.git
-cd Newspack
+git clone https://github.com/Postdated/NewsRock.git
+cd NewsRock/newspack-bedrock
 cp .env.example .env
 composer install
 ```
