@@ -286,7 +286,7 @@ class API {
     public static function health_check() {
         return rest_ensure_response( [
             'status'    => 'ok',
-            'site'      => get_bloginfo( 'name ),
+            'site'      => get_bloginfo( 'name' ),
             'timestamp' => current_time( 'c' ),
         ] );
     }
