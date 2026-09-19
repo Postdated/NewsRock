@@ -1,0 +1,105 @@
+import 'react';
+import icons from '../components/icons';
+import type { Tool } from '../views/settings/experimental-tools/types';
+
+declare module 'react' {
+	interface CSSProperties {
+		[ key: `--${ string }` ]: string | number;
+	}
+}
+
+type WizardTab = {
+	label: string;
+	path?: string;
+	activeTabPaths?: string[];
+	sections: {
+		[ k: string ]: {
+			editLink?: string;
+			dependencies?: Record< string, string >;
+			enabled?: Record< string, boolean >;
+		} & Record< string, any >;
+	};
+};
+
+declare global {
+	interface Window {
+		newspackDashboard: {
+			siteStatuses: {
+				readerActivation: Status;
+				googleAnalytics: Status;
+				googleAdManager: Status & {
+					isAvailable: boolean;
+				};
+			};
+			quickActions: {
+				href: string;
+				title: string;
+				icon: keyof typeof icons;
+			}[];
+			sections: {
+				[ k: string ]: {
+					title: string;
+					desc: string;
+					cards: {
+						href: string;
+						title: string;
+						desc: string;
+						icon: keyof typeof icons;
+					}[];
+				};
+			};
+			settings: {
+				siteName: string;
+				headerBgColor: string;
+			};
+		};
+		newspackSettings: {
+			social: WizardTab & {
+				nextdoor: {
+					available_roles: {
+						label: string;
+						value: string;
+					}[];
+					country_options: {
+						label: string;
+						value: string;
+					}[];
+					redirect_uri: string;
+				};
+			};
+			connections: WizardTab;
+			syndication: WizardTab;
+			'theme-and-brand': WizardTab;
+			seo: WizardTab;
+			print: WizardTab;
+			'additional-brands': WizardTab & {
+				sections: {
+					additionalBrands: {
+						themeColors: {
+							color: string;
+							label: string;
+							theme_mod_name?: string;
+							default?: string;
+						}[];
+						menuLocations: Record< string, string >;
+						menus: { label: string; value: number }[];
+					};
+				};
+			};
+			'advanced-settings': WizardTab;
+			collections: WizardTab;
+			privacy: WizardTab;
+			// Present only when experimental tools are registered; consumers guard with `in` checks and optional chaining.
+			'experimental-tools'?: WizardTab & {
+				sections: {
+					tools: Tool[];
+				};
+			};
+		};
+		newspack_urls: {
+			site: string;
+		};
+	}
+}
+
+export {};
