@@ -1,0 +1,22 @@
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Node
+node_modules/
+npm-debug.log
+
+# Discord bot state
+discord-bot/bot-state.json
+discord-bot/.env
+
+# WordPress
+wp-config.php
+wp-content/uploads/
+
