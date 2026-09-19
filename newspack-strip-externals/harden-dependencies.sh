@@ -9,7 +9,7 @@
 
 set -euo pipefail
 
-PLUGINS_DIR="${1:-/var/www/html/wp-content/plugins}"
+PLUGINS_DIR="${1:-./web/app/plugins}"
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'

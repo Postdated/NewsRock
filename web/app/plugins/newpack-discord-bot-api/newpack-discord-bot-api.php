@@ -3,8 +3,8 @@
  * Plugin Name: Newpack Discord Bot API
  * Description: Exposes a REST API for the Discord polling bot to query rolling coverage, newsletters, and events.
  * Version: 1.0.0
- * Requires PHP: 7.4
- * Requires at least: 6.0
+ * Requires PHP: 8.3
+ * Requires at least: 6.5
  * Author: Newsroom
  *
  * @package Newpack_Discord_Bot

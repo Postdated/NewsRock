@@ -1,0 +1,13 @@
+{
+  "name": "postdated/newspack-local-esps",
+  "description": "Local ESPs for Newspack Newsletters",
+  "type": "wordpress-plugin",
+  "license": "GPL-2.0-or-later",
+  "require": {
+    "php": ">=8.3",
+    "composer/installers": "^2.0"
+  },
+  "extra": {
+    "installer-name": "newspack-local-esps"
+  }
+}

@@ -2,10 +2,10 @@
 /**
  * Plugin Name: Newsroom Speed Cache
  * Plugin URI:  https://github.com/newsroom/speed-cache
- * Description: Makes your newsroom blazing fast. Wraps Newpack's heaviest database queries with instant object cache lookups. Works with Memcached, Redis, APCu, or any WordPress object cache backend.
+ * Description: Makes your newsroom blazing fast. Wraps Newpack's heaviest database queries with instant object cache lookups. Uses WordPress object cache (Memcached on Roots Trellis/Bedrock).
  * Version:     1.0.0
- * Requires PHP: 7.4
- * Requires at least: 6.0
+ * Requires PHP: 8.3
+ * Requires at least: 6.5
  * Author:      Newsroom
  * Author URI:  https://newsroom.dev
  * License:     GPL-2.0-or-later
@@ -94,20 +94,8 @@ class Speed_Cache {
         }
 
         // Check for known drop-ins
-        if ( defined( 'WP_REDIS_VERSION' ) || defined( 'WP_REDIS_DISABLED' ) ) {
-            return 'redis';
-        }
-        if ( class_exists( 'W3_ObjectCache' ) ) {
-            return 'w3-total-cache';
-        }
-        if ( defined( 'WPFC_WP_CONTENT_DIR' ) ) {
-            return 'wp-fastest-cache';
-        }
         if ( class_exists( 'Memcached' ) || extension_loaded( 'memcached' ) ) {
             return 'memcached';
-        }
-        if ( function_exists( 'apcu_store' ) ) {
-            return 'apcu';
         }
 
         return 'active';
@@ -121,11 +109,7 @@ class Speed_Cache {
     public static function get_backend_label() {
         $backends = [
             'none'            => 'Not Found',
-            'redis'           => 'Redis',
             'memcached'       => 'Memcached',
-            'apcu'            => 'APCu',
-            'w3-total-cache'  => 'W3 Total Cache',
-            'wp-fastest-cache' => 'WP Fastest Cache',
             'active'          => 'Active',
         ];
 
@@ -332,9 +316,9 @@ class Speed_Cache {
     public static function no_cache_notice() {
         echo '<div class="notice notice-warning"><p>';
         echo '<strong>Newsroom Speed Cache:</strong> No object cache backend detected. ';
-        echo 'Install <a href="https://wordpress.org/plugins/memcached/" target="_blank">Memcached</a>, ';
-        echo '<a href="https://wordpress.org/plugins/redis-cache/" target="_blank">Redis</a>, or ';
-        echo 'another object cache drop-in for maximum performance.';
+        echo 'Install the Memcached PECL extension and the Bedrock object-cache drop-in. ';
+        echo '';
+        echo 'This project uses Memcached only (Roots Trellis).';
         echo '</p></div>';
     }
 
@@ -394,7 +378,6 @@ class Speed_Cache {
                         <p>Your newsroom is hitting the database on every page view. Install an object cache backend for a massive speed boost:</p>
                         <ul>
                             <li><strong><a href="https://wordpress.org/plugins/memcached/" target="_blank">Memcached</a></strong> — Best for shared hosting. Drop-in replacement.</li>
-                            <li><strong><a href="https://wordpress.org/plugins/redis-cache/" target="_blank">Redis</a></strong> — Best for VPS/dedicated. More features.</li>
                             <li><strong>APCu</strong> — In-memory, single-server only.</li>
                         </ul>
                         <p>After installing a backend, this plugin will automatically start caching.</p>
@@ -461,7 +444,7 @@ class Speed_Cache {
                     <li>If not found, it queries the database, caches the result, and returns it</li>
                     <li>When content is updated (post saved, ad changed, etc.), the cache is flushed automatically</li>
                 </ol>
-                <p>Works with <strong>any</strong> WordPress object cache backend: Memcached, Redis, APCu, or any custom drop-in.</p>
+                <p>Works with <strong>any</strong> WordPress object cache backend: Memcached, or any custom drop-in.</p>
 
                 <h2>Cache Backend Info</h2>
                 <table class="form-table" style="max-width:400px;">

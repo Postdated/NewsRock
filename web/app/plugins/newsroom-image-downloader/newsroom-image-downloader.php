@@ -4,8 +4,8 @@
  * Plugin URI:  https://newsroom.dev
  * Description: Download external images into your WordPress media library from the admin dashboard. Scans posts for external image URLs and imports them locally. Web-based wrapper around the image download logic.
  * Version:     1.0.0
- * Requires PHP: 7.4
- * Requires at least: 6.0
+ * Requires PHP: 8.3
+ * Requires at least: 6.5
  * Author:      Newsroom
  * License:     GPL-2.0-or-later
  * Text Domain: newsroom-image-downloader

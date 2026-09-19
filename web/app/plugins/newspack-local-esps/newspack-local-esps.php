@@ -3,8 +3,8 @@
  * Plugin Name: Newspack Local ESPs
  * Description: Adds 11 email service providers to Newspack Newsletters with full tag, attribute, segment, and merge tag support. Providers: Amazon SES, Resend, Plunk, Elastic Email, Mailgun, Mailtrap, Mail250, BillionMail, Mautic, Listmonk, and generic SMTP.
  * Version: 1.0.0
- * Requires PHP: 7.4
- * Requires at least: 6.0
+ * Requires PHP: 8.3
+ * Requires at least: 6.5
  * Author: Newsroom
  * License: GPL-2.0-or-later
  *
