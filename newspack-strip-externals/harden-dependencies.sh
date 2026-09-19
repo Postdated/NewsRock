@@ -120,3 +120,15 @@ log "  ✅ TranslatePress telemetry disabled"
 log ""
 log "Done! All dependency plugins audited and hardened."
 
+
+# ─── Flux Media Optimizer: Keep — Local Processing ───
+# Flux uses GD, Imagick, and FFmpeg for LOCAL image/video conversion.
+# Images never leave the server when local processing is enabled.
+# External API calls (api.fluxplugins.com) are only for license validation.
+if [ -d "$PLUGINS_DIR/flux-media-optimizer" ]; then
+    log "Flux Media Optimizer: Audited — processes images locally via GD/Imagick/FFmpeg."
+    log "  External calls: api.fluxplugins.com (license validation only — NOT media)"
+    log "  Media stays on server: ✅ Local processing via GD/Imagick/FFmpeg"
+    log "  No changes needed — keep local processing mode enabled in settings"
+fi
+
