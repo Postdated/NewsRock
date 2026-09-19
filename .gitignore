@@ -10,3 +10,9 @@ Thumbs.db
 .env.*
 !.env.example
 auth.json
+
+# Plugin archives (too large for git; use GitHub Releases)
+*.zip
+
+# Dependencies (each product installs its own)
+node_modules/
