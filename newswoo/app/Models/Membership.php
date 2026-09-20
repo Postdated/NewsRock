@@ -18,6 +18,7 @@ class Membership extends Model
     protected $table = 'posts';
     protected $primaryKey = 'ID';
     public $timestamps = false;
+    public $incrementing = false;
 
     const STATUS_ACTIVE    = 'wcm-active';
     const STATUS_CANCELLED = 'wcm-cancelled';
