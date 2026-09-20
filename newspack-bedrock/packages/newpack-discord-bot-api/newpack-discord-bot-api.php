@@ -152,34 +152,43 @@ class API {
             ];
         }
 
-        $query = new \WP_Query( $args );
-        $entries = [];
-
-        foreach ( $query->posts as $post ) {
-            $coverage_terms = get_the_terms( $post, 'np_coverage' );
-            $coverage_name = $coverage_terms && ! is_wp_error( $coverage_terms )
-                ? $coverage_terms[0]->name
-                : 'General';
-
-            $author = get_userdata( $post->post_author );
-
-            $entries[] = [
-                'id'             => $post->ID,
-                'title'          => html_entity_decode( get_the_title( $post ), ENT_QUOTES, 'UTF-8' ),
-                'content'        => wp_trim_words( wp_strip_all_tags( $post->post_content ), 80 ),
-                'link'           => get_permalink( $post ),
-                'date'           => get_the_date( 'c', $post ),
-                'modified'       => get_the_modified_date( 'c', $post ),
-                'coverage_name'  => $coverage_name,
-                'author'         => $author ? $author->display_name : 'Unknown',
-                'source'         => get_post_meta( $post->ID, '_np_source', true ) ?: 'Staff',
-            ];
+        $cache_key = 'discord_entries_' . md5($since . '_' . $limit);
+        $cached = \Illuminate\Support\Facades\Cache::get($cache_key);
+        if ($cached) {
+            return rest_ensure_response($cached);
         }
 
-        return rest_ensure_response( [
-            'entries' => $entries,
-            'total'   => $query->found_posts,
-        ] );
+        $posts = \App\Models\Post::with(['author', 'meta'])
+            ->published()
+            ->ofType('np_coverage_entry')
+            ->orderBy('post_date', 'desc')
+            ->limit($limit);
+
+        if ( ! empty( $since ) ) {
+            $posts->where('post_date', '>', $since);
+        }
+
+        $entries = $posts->get()->map(function ($post) {
+            $terms = wp_get_object_terms($post->ID, 'np_coverage');
+            $coverage_name = ($terms && !is_wp_error($terms)) ? $terms[0]->name : 'General';
+            $source_meta = $post->meta->firstWhere('meta_key', '_np_source');
+
+            return [
+                'id'             => $post->ID,
+                'title'          => html_entity_decode($post->post_title, ENT_QUOTES, 'UTF-8'),
+                'content'        => wp_trim_words(wp_strip_all_tags($post->post_content), 80),
+                'link'           => get_permalink($post->ID),
+                'date'           => date('c', strtotime($post->post_date)),
+                'modified'       => date('c', strtotime($post->post_modified)),
+                'coverage_name'  => $coverage_name,
+                'author'         => $post->author ? $post->author->display_name : 'Unknown',
+                'source'         => $source_meta ? $source_meta->meta_value : 'Staff',
+            ];
+        })->toArray();
+
+        $response = compact('entries');
+        \Illuminate\Support\Facades\Cache::put($cache_key, $response, 60);
+        return rest_ensure_response($response);
     }
 
     /**
@@ -206,30 +215,45 @@ class API {
             ];
         }
 
-        $query = new \WP_Query( $args );
-        $newsletters = [];
+        $cache_key = 'discord_newsletters_' . md5($since . '_' . $limit);
+        $cached = \Illuminate\Support\Facades\Cache::get($cache_key);
+        if ($cached) {
+            return rest_ensure_response($cached);
+        }
 
-        foreach ( $query->posts as $post ) {
-            $sent = get_post_meta( $post->ID, 'newspack_newsletters_sent', true );
-            if ( ! $sent ) {
-                continue; // Only report actually sent newsletters.
+        $posts = \App\Models\Post::with('meta')
+            ->whereIn('post_status', ['publish', 'private'])
+            ->ofType('newspack_nl_cpt')
+            ->orderBy('post_date', 'desc')
+            ->limit($limit);
+
+        if ( ! empty( $since ) ) {
+            $posts->where('post_date', '>', $since);
+        }
+
+        $newsletters = [];
+        foreach ( $posts->get() as $post ) {
+            $sent_meta = $post->meta->firstWhere('meta_key', 'newspack_newsletters_sent');
+            if ( ! $sent_meta || ! $sent_meta->meta_value ) {
+                continue;
             }
+            $count_meta = $post->meta->firstWhere('meta_key', 'newspack_newsletters_subscriber_count');
+            $list_meta = $post->meta->firstWhere('meta_key', 'newspack_newsletters_list_name');
 
             $newsletters[] = [
                 'id'               => $post->ID,
-                'title'            => html_entity_decode( get_the_title( $post ), ENT_QUOTES, 'UTF-8' ),
-                'excerpt'          => wp_trim_words( wp_strip_all_tags( $post->post_content ), 40 ),
-                'link'             => get_permalink( $post ),
-                'date'             => get_the_date( 'c', $post ),
-                'subscriber_count' => get_post_meta( $post->ID, 'newspack_newsletters_subscriber_count', true ) ?: 'N/A',
-                'list_name'        => get_post_meta( $post->ID, 'newspack_newsletters_list_name', true ) ?: 'All',
+                'title'            => html_entity_decode($post->post_title, ENT_QUOTES, 'UTF-8'),
+                'excerpt'          => wp_trim_words(wp_strip_all_tags($post->post_content), 40),
+                'link'             => get_permalink($post->ID),
+                'date'             => date('c', strtotime($post->post_date)),
+                'subscriber_count' => $count_meta ? $count_meta->meta_value : 'N/A',
+                'list_name'        => $list_meta ? $list_meta->meta_value : 'All',
             ];
         }
 
-        return rest_ensure_response( [
-            'newsletters' => $newsletters,
-            'total'       => $query->found_posts,
-        ] );
+        $response = compact('newsletters');
+        \Illuminate\Support\Facades\Cache::put($cache_key, $response, 300);
+        return rest_ensure_response($response);
     }
 
     /**
@@ -257,27 +281,41 @@ class API {
             ];
         }
 
-        $query = new \WP_Query( $args );
-        $events = [];
-
-        foreach ( $query->posts as $post ) {
-            $is_new = ( get_the_date( 'c', $post ) === get_the_modified_date( 'c', $post ) );
-
-            $events[] = [
-                'id'          => $post->ID,
-                'title'       => html_entity_decode( get_the_title( $post ), ENT_QUOTES, 'UTF-8' ),
-                'description' => wp_trim_words( wp_strip_all_tags( $post->post_content ), 40 ),
-                'link'        => get_permalink( $post ),
-                'date'        => get_the_modified_date( 'c', $post ),
-                'event_type'  => $is_new ? 'Published' : 'Updated',
-                'author'      => get_the_author_meta( 'display_name', $post->post_author ),
-            ];
+        $cache_key = 'discord_events_' . md5($since . '_' . $limit);
+        $cached = \Illuminate\Support\Facades\Cache::get($cache_key);
+        if ($cached) {
+            return rest_ensure_response($cached);
         }
 
-        return rest_ensure_response( [
-            'events' => $events,
-            'total'  => $query->found_posts,
-        ] );
+        $posts = \App\Models\Post::with('author')
+            ->published()
+            ->ofType('post')
+            ->orderBy('post_modified', 'desc')
+            ->limit($limit);
+
+        if ( ! empty( $since ) ) {
+            $posts->where('post_modified', '>', $since);
+        }
+
+        $events = $posts->get()->map(function ($post) {
+            $date_created = date('c', strtotime($post->post_date));
+            $date_modified = date('c', strtotime($post->post_modified));
+            $is_new = ($date_created === $date_modified);
+
+            return [
+                'id'          => $post->ID,
+                'title'       => html_entity_decode($post->post_title, ENT_QUOTES, 'UTF-8'),
+                'description' => wp_trim_words(wp_strip_all_tags($post->post_content), 40),
+                'link'        => get_permalink($post->ID),
+                'date'        => $date_modified,
+                'event_type'  => $is_new ? 'Published' : 'Updated',
+                'author'      => $post->author ? $post->author->display_name : 'Unknown',
+            ];
+        })->toArray();
+
+        $response = compact('events');
+        \Illuminate\Support\Facades\Cache::put($cache_key, $response, 60);
+        return rest_ensure_response($response);
     }
 
     /**

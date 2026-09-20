@@ -54,7 +54,7 @@ test('eloquent models follow acorn conventions', function () {
 
 test('discord bot api uses eloquent cache not raw transients', function () {
     $api = file_get_contents(dirname(__DIR__) . '/packages/newpack-discord-bot-api/newpack-discord-bot-api.php');
-    expect($api)->toContain('Illuminate\\Support\\Facades\\Cache');
+    expect($api)->toContain('\\Illuminate\\Support\\Facades\\Cache');
     expect($api)->toContain('\\App\\Models\\Post');
     expect($api)->not->toContain('new WP_Query');
 });
