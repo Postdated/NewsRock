@@ -43,3 +43,7 @@ Thumbs.db
 discord-bot/node_modules/
 discord-bot/bot-state.json
 discord-bot/.env
+
+storage/logs/*
+!storage/logs/.gitkeep
+!storage/.gitkeep

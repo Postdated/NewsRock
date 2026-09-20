@@ -712,7 +712,7 @@ function newspack_get_social_markup( $color = 'white' ) {
 									<tbody>
 										<tr>
 											<td style="padding:8px;padding-left:' . ( $has_social_icons ? '8px' : '0px' ) . ';font-size:0;height:24px;vertical-align:middle;width:24px;">
-												<a href="' . esc_url( $url ) . '" target="_blank"><img alt="" height="24" src="*SITE_URL*/wp-content/plugins/newspack-newsletters/assets/' . $color . '-' . $service . '.png" style="border-radius:999px;display:block;" width="24"></a>
+												<a href="' . esc_url( $url ) . '" target="_blank"><img alt="" height="24" src="*SITE_URL*/app/plugins/newspack-newsletters/assets/' . $color . '-' . $service . '.png" style="border-radius:999px;display:block;" width="24"></a>
 											</td>
 										</tr>
 									</tbody>

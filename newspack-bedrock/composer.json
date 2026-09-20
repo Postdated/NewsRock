@@ -62,7 +62,8 @@
     "bwps/prevent-direct-access": "2.8.9.1",
     "elightup/slim-seo": "4.10.1",
     "onesignal/onesignal-free-web-push-notifications": "3.9.3",
-    "wp-plugin/ai": "*"
+    "wp-plugin/ai": "*",
+    "livewire/livewire": "^3.0"
   },
   "require-dev": {
     "laravel/pint": "^1.0",

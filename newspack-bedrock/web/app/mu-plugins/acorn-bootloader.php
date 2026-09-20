@@ -25,7 +25,7 @@ add_action(
         }
 
         Application::configure()
-            ->withRouting(wordpress: true)
+            ->withRouting(web: base_path('routes/web.php'), wordpress: true)
             ->boot();
     },
     0
