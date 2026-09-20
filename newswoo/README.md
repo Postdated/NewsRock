@@ -1,12 +1,14 @@
+# NewsWoo
+
 ![NewsWoo Logo](assets/logo.svg)
 
-**WooCommerce, rebuilt for newsrooms.** A lean, purpose-built fork of WooCommerce designed as a drop-in replacement for [Newspack Bedrock](../newspack-bedrock/) — stripped of retail bloat and optimized for digital subscriptions, paywall access, and reader donations.
+**WooCommerce, rebuilt for newsrooms.** A lean, purpose-built fork of WooCommerce designed as a drop-in replacement for [Newspack Bedrock](https://github.com/Postdated/Newspack) — stripped of retail bloat and optimized for digital subscriptions, paywall access, and reader donations.
 
 ## The NewsWoo + Newspack Stack
 
 ```
 ┌─────────────────────────────────────────────────┐
-│  Newspack Bedrock (NewsRock/newspack-bedrock)          │
+│  Newspack Bedrock (Postdated/Newspack)          │
 │  ├── newspack-plugin   (content gates, paywall) │
 │  ├── newspack-blocks   (modal checkout, donate) │
 │  ├── newspack-popups   (reader conversion)      │
@@ -108,6 +110,7 @@ GPL-2.0-or-later (same as WooCommerce)
 ## Links
 
 - [NewsWoo Repository](https://github.com/Postdated/NewsWoo)
-- [Newspack Bedrock](../newspack-bedrock/)
+- [Newspack Bedrock](https://github.com/Postdated/Newspack)
 - [Newspack (upstream)](https://newspack.com/)
 - [WooCommerce](https://woocommerce.com/)
+
