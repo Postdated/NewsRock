@@ -132,54 +132,43 @@ class API {
      */
     public static function get_entries( $request ) {
         $since = $request->get_param( 'since' );
-        $limit = $request->get_param( 'limit' );
+        $limit = $request->get_param( 'limit' ) ?: 50;
 
-        // Query rolling coverage post type
-        $args = [
-            'post_type'      => 'np_coverage_entry',
-            'posts_per_page' => $limit,
-            'post_status'    => 'publish',
-            'orderby'        => 'date',
-            'order'          => 'DESC',
-        ];
+        $cache_key = "discord_bot_entries_{$since}_{$limit}";
+        return rest_ensure_response( \Illuminate\Support\Facades\Cache::remember( $cache_key, 60, function () use ( $since, $limit ) {
+            $query = \App\Models\Post::with(['author', 'terms', 'meta'])
+                ->published()
+                ->ofType('np_coverage_entry')
+                ->orderBy('post_date', 'desc')
+                ->limit($limit);
 
-        if ( ! empty( $since ) ) {
-            $args['date_query'] = [
-                [
-                    'after'     => $since,
-                    'inclusive' => false,
-                ],
+            if ( ! empty( $since ) ) {
+                $query->where('post_date', '>', $since);
+            }
+
+            $posts = $query->get();
+            $entries = $posts->map(function ($post) {
+                $term = $post->terms->firstWhere('taxonomy', 'np_coverage');
+                $source_meta = $post->meta->firstWhere('meta_key', '_np_source');
+
+                return [
+                    'id'             => $post->ID,
+                    'title'          => html_entity_decode( $post->post_title, ENT_QUOTES, 'UTF-8' ),
+                    'content'        => wp_trim_words( wp_strip_all_tags( $post->post_content ), 80 ),
+                    'link'           => get_permalink( $post->ID ),
+                    'date'           => date('c', strtotime($post->post_date)),
+                    'modified'       => date('c', strtotime($post->post_modified)),
+                    'coverage_name'  => $term ? $term->name : 'General',
+                    'author'         => $post->author ? $post->author->display_name : 'Unknown',
+                    'source'         => $source_meta ? $source_meta->meta_value : 'Staff',
+                ];
+            });
+
+            return [
+                'entries' => $entries,
+                'total'   => $posts->count(), // or a separate count query if needed
             ];
-        }
-
-        $query = new \WP_Query( $args );
-        $entries = [];
-
-        foreach ( $query->posts as $post ) {
-            $coverage_terms = get_the_terms( $post, 'np_coverage' );
-            $coverage_name = $coverage_terms && ! is_wp_error( $coverage_terms )
-                ? $coverage_terms[0]->name
-                : 'General';
-
-            $author = get_userdata( $post->post_author );
-
-            $entries[] = [
-                'id'             => $post->ID,
-                'title'          => html_entity_decode( get_the_title( $post ), ENT_QUOTES, 'UTF-8' ),
-                'content'        => wp_trim_words( wp_strip_all_tags( $post->post_content ), 80 ),
-                'link'           => get_permalink( $post ),
-                'date'           => get_the_date( 'c', $post ),
-                'modified'       => get_the_modified_date( 'c', $post ),
-                'coverage_name'  => $coverage_name,
-                'author'         => $author ? $author->display_name : 'Unknown',
-                'source'         => get_post_meta( $post->ID, '_np_source', true ) ?: 'Staff',
-            ];
-        }
-
-        return rest_ensure_response( [
-            'entries' => $entries,
-            'total'   => $query->found_posts,
-        ] );
+        } ) );
     }
 
     /**
@@ -187,49 +176,48 @@ class API {
      */
     public static function get_newsletters( $request ) {
         $since = $request->get_param( 'since' );
-        $limit = $request->get_param( 'limit' );
+        $limit = $request->get_param( 'limit' ) ?: 20;
 
-        $args = [
-            'post_type'      => 'newspack_nl_cpt',
-            'posts_per_page' => $limit,
-            'post_status'    => [ 'publish', 'private' ],
-            'orderby'        => 'date',
-            'order'          => 'DESC',
-        ];
+        $cache_key = "discord_bot_newsletters_{$since}_{$limit}";
+        return rest_ensure_response( \Illuminate\Support\Facades\Cache::remember( $cache_key, 300, function () use ( $since, $limit ) {
+            $query = \App\Models\Post::with('meta')
+                ->whereIn('post_status', ['publish', 'private'])
+                ->ofType('newspack_nl_cpt')
+                ->orderBy('post_date', 'desc')
+                ->limit($limit);
 
-        if ( ! empty( $since ) ) {
-            $args['date_query'] = [
-                [
-                    'after'     => $since,
-                    'inclusive' => false,
-                ],
-            ];
-        }
-
-        $query = new \WP_Query( $args );
-        $newsletters = [];
-
-        foreach ( $query->posts as $post ) {
-            $sent = get_post_meta( $post->ID, 'newspack_newsletters_sent', true );
-            if ( ! $sent ) {
-                continue; // Only report actually sent newsletters.
+            if ( ! empty( $since ) ) {
+                $query->where('post_date', '>', $since);
             }
 
-            $newsletters[] = [
-                'id'               => $post->ID,
-                'title'            => html_entity_decode( get_the_title( $post ), ENT_QUOTES, 'UTF-8' ),
-                'excerpt'          => wp_trim_words( wp_strip_all_tags( $post->post_content ), 40 ),
-                'link'             => get_permalink( $post ),
-                'date'             => get_the_date( 'c', $post ),
-                'subscriber_count' => get_post_meta( $post->ID, 'newspack_newsletters_subscriber_count', true ) ?: 'N/A',
-                'list_name'        => get_post_meta( $post->ID, 'newspack_newsletters_list_name', true ) ?: 'All',
-            ];
-        }
+            $posts = $query->get();
+            $newsletters = [];
 
-        return rest_ensure_response( [
-            'newsletters' => $newsletters,
-            'total'       => $query->found_posts,
-        ] );
+            foreach ( $posts as $post ) {
+                $sent_meta = $post->meta->firstWhere('meta_key', 'newspack_newsletters_sent');
+                if ( ! $sent_meta || ! $sent_meta->meta_value ) {
+                    continue;
+                }
+
+                $count_meta = $post->meta->firstWhere('meta_key', 'newspack_newsletters_subscriber_count');
+                $list_meta = $post->meta->firstWhere('meta_key', 'newspack_newsletters_list_name');
+
+                $newsletters[] = [
+                    'id'               => $post->ID,
+                    'title'            => html_entity_decode( $post->post_title, ENT_QUOTES, 'UTF-8' ),
+                    'excerpt'          => wp_trim_words( wp_strip_all_tags( $post->post_content ), 40 ),
+                    'link'             => get_permalink( $post->ID ),
+                    'date'             => date('c', strtotime($post->post_date)),
+                    'subscriber_count' => $count_meta ? $count_meta->meta_value : 'N/A',
+                    'list_name'        => $list_meta ? $list_meta->meta_value : 'All',
+                ];
+            }
+
+            return [
+                'newsletters' => $newsletters,
+                'total'       => count($newsletters),
+            ];
+        } ) );
     }
 
     /**
@@ -237,47 +225,42 @@ class API {
      */
     public static function get_events( $request ) {
         $since = $request->get_param( 'since' );
-        $limit = $request->get_param( 'limit' );
+        $limit = $request->get_param( 'limit' ) ?: 50;
 
-        $args = [
-            'post_type'      => 'post',
-            'posts_per_page' => $limit,
-            'post_status'    => 'publish',
-            'orderby'        => 'modified',
-            'order'          => 'DESC',
-        ];
+        $cache_key = "discord_bot_events_{$since}_{$limit}";
+        return rest_ensure_response( \Illuminate\Support\Facades\Cache::remember( $cache_key, 60, function () use ( $since, $limit ) {
+            $query = \App\Models\Post::with('author')
+                ->published()
+                ->ofType('post')
+                ->orderBy('post_modified', 'desc')
+                ->limit($limit);
 
-        if ( ! empty( $since ) ) {
-            $args['date_query'] = [
-                [
-                    'column'    => 'post_modified',
-                    'after'     => $since,
-                    'inclusive' => false,
-                ],
+            if ( ! empty( $since ) ) {
+                $query->where('post_modified', '>', $since);
+            }
+
+            $posts = $query->get();
+            $events = $posts->map(function ($post) {
+                $date_created = date('c', strtotime($post->post_date));
+                $date_modified = date('c', strtotime($post->post_modified));
+                $is_new = ( $date_created === $date_modified );
+
+                return [
+                    'id'          => $post->ID,
+                    'title'       => html_entity_decode( $post->post_title, ENT_QUOTES, 'UTF-8' ),
+                    'description' => wp_trim_words( wp_strip_all_tags( $post->post_content ), 40 ),
+                    'link'        => get_permalink( $post->ID ),
+                    'date'        => $date_modified,
+                    'event_type'  => $is_new ? 'Published' : 'Updated',
+                    'author'      => $post->author ? $post->author->display_name : 'Unknown',
+                ];
+            });
+
+            return [
+                'events' => $events,
+                'total'  => $posts->count(),
             ];
-        }
-
-        $query = new \WP_Query( $args );
-        $events = [];
-
-        foreach ( $query->posts as $post ) {
-            $is_new = ( get_the_date( 'c', $post ) === get_the_modified_date( 'c', $post ) );
-
-            $events[] = [
-                'id'          => $post->ID,
-                'title'       => html_entity_decode( get_the_title( $post ), ENT_QUOTES, 'UTF-8' ),
-                'description' => wp_trim_words( wp_strip_all_tags( $post->post_content ), 40 ),
-                'link'        => get_permalink( $post ),
-                'date'        => get_the_modified_date( 'c', $post ),
-                'event_type'  => $is_new ? 'Published' : 'Updated',
-                'author'      => get_the_author_meta( 'display_name', $post->post_author ),
-            ];
-        }
-
-        return rest_ensure_response( [
-            'events' => $events,
-            'total'  => $query->found_posts,
-        ] );
+        } ) );
     }
 
     /**
