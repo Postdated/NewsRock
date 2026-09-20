@@ -18,7 +18,6 @@ class Subscription extends Model
     protected $table = 'posts';
     protected $primaryKey = 'ID';
     public $timestamps = false;
-    public $incrementing = false;
     protected $postType = 'shop_subscription';
 
     protected $fillable = [

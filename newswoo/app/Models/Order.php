@@ -18,7 +18,6 @@ class Order extends Model
     protected $table = 'posts';
     protected $primaryKey = 'ID';
     public $timestamps = false;
-    public $incrementing = false;
 
     const STATUS_PENDING    = 'wc-pending';
     const STATUS_PROCESSING = 'wc-processing';

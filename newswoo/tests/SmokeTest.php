@@ -29,18 +29,25 @@ class SmokeTest extends NewsWooTestCase
         $this->assertTrue(class_exists(WooCommerceBridge::class));
     }
 
-    public function test_model_properties(): void
+    public function test_model_properties_match_acorn_docs(): void
     {
+        // Per https://roots.io/acorn/docs/eloquent-models/
+        // WordPress models must have: table, primaryKey='ID', timestamps=false
+        
         $sub = new Subscription();
         $this->assertEquals('posts', $sub->getTable());
         $this->assertEquals('ID', $sub->getKeyName());
-        $this->assertFalse($sub->getIncrementing());
         $this->assertFalse($sub->usesTimestamps());
 
         $user = new User();
         $this->assertEquals('users', $user->getTable());
         $this->assertEquals('ID', $user->getKeyName());
-        $this->assertFalse($user->getIncrementing());
+        $this->assertFalse($user->usesTimestamps());
+
+        $order = new Order();
+        $this->assertEquals('posts', $order->getTable());
+        $this->assertEquals('ID', $order->getKeyName());
+        $this->assertFalse($order->usesTimestamps());
     }
 
     public function test_subscription_statuses(): void
