@@ -330,3 +330,181 @@ The recommended order now accounts for Newspack integration risk:
 *Analysis based on WooCommerce 11.1.1, Subscriptions 9.2.0, Memberships 1.30.0, Name Your Price 3.8.2, Subscriptions Gifting 2.9.1, Newspack Plugin 6.52.0-alpha.1*
 *Generated: 2026-09-19*
 
+
+
+---
+
+## 9. Subscriptions Plugin Deep Dive (9.2.0 — 155,157 LOC)
+
+### Directory Structure
+```
+woocommerce-subscriptions/
+├── includes/
+│   ├── core/                          # Core subscription engine
+│   │   ├── abstracts/                 # Base classes
+│   │   ├── admin/                     # Admin UI, meta boxes, reports
+│   │   ├── data-stores/               # CPT and order-table data stores
+│   │   ├── deprecated/                # Deprecation handlers
+│   │   ├── emails/                    # 16 email notification classes
+│   │   ├── gateways/                  # Payment gateway integration + PayPal
+│   │   ├── interfaces/                # Interface contracts
+│   │   ├── privacy/                   # GDPR data export/erase
+│   │   └── upgrades/                  # Migration scripts (v1.2 → v9.2)
+│   ├── api/                           # REST API (v1, v2, legacy)
+│   ├── apfs/                          # All Products for Subscriptions
+│   │   ├── admin/                     # Plans manager, REST controllers
+│   │   ├── display/                   # Cart/product display
+│   │   ├── integrations/              # Stripe, PayPal, Square, NYP, etc.
+│   │   ├── modules/                   # Subscription switching/management
+│   │   └── product/                   # Price filtering, schemes
+│   ├── downloads/                     # Subscription-gated downloads
+│   ├── early-renewal/                 # Early renewal modal
+│   ├── gateways/                      # Payment gateway restrictions
+│   ├── gifting/                       # Gift subscription system
+│   ├── health-check/                  # DB table verification
+│   ├── payment-retry/                 # Failed payment retry engine
+│   └── switching/                     # Upgrade/downgrade switching
+├── src/Internal/                      # Modern PHP (namespaced)
+│   ├── Admin/                         # Admin features
+│   ├── CLI/                           # WP-CLI commands
+│   ├── HealthCheck/                   # Health checks
+│   ├── PayPal/                        # PayPal integration
+│   ├── Pricing/                       # Price calculations
+│   ├── Products/                      # Product handling
+│   ├── Queue_Management/              # Action scheduler
+│   ├── Settings/                      # Settings management
+│   ├── Telemetry/                     # Usage tracking
+│   └── Utilities/                     # Helper classes
+├── templates/                         # Override templates
+│   ├── admin/                         # Admin views
+│   ├── cart/                          # Cart templates
+│   ├── checkout/                      # Checkout templates
+│   ├── emails/                        # Email templates
+│   ├── gifting/                       # Gift templates
+│   ├── myaccount/                     # My Account templates
+│   └── single-product/               # Product page templates
+└── assets/                            # CSS, JS, fonts, images
+```
+
+### Key Classes (43 core + 58 APFS + 12 gifting + 12 payment-retry + 7 switching = 132 total)
+
+| Class | LOC | Purpose |
+|-------|-----|---------|
+| `WC_Subscription` | ~2,500 | Subscription order model (extends WC_Order) |
+| `WC_Subscriptions_Manager` | ~1,800 | Lifecycle: activate, suspend, cancel, expire |
+| `WC_Subscriptions_Order` | ~2,200 | Order-to-subscription linkage, renewal triggers |
+| `WC_Subscriptions_Checkout` | ~1,500 | Subscription-aware checkout flow |
+| `WC_Subscriptions_Cart` | ~1,200 | Cart validation and mixed-cart handling |
+| `WC_Subscriptions_Renewal_Order` | ~1,400 | Renewal order generation |
+| `WC_Subscriptions_Product` | ~1,000 | Product-level subscription data |
+| `WC_Product_Subscription` | ~400 | Subscription product type |
+| `WC_Product_Variable_Subscription` | ~300 | Variable subscription product |
+| `WCS_Retry_Manager` | ~800 | Failed payment retry engine |
+| `WC_Subscriptions_Switcher` | ~1,200 | Upgrade/downgrade switching |
+| `WCS_Cart_Early_Renewal` | ~400 | Early renewal flow |
+| `WCS_Gifting` | ~600 | Gift subscription system |
+| `WCS_Att_*` (58 classes) | ~25,000 | All Products for Subscriptions (plans/schemes) |
+
+### Newspack Compatibility Requirements
+
+1. **Status constants must match:** `active`, `pending-cancel`, `on-hold`, `cancelled`, `expired`
+2. **Hook: `woocommerce_order_status_completed`** — fires for initial + renewal orders
+3. **Hook: `cancelled_subscription_notification`** — Newspack sends custom cancellation email
+4. **Filter: `option_woocommerce_subscriptions_allow_switching`** — forced to `yes` by Newspack
+5. **Filter: `option_woocommerce_subscriptions_enable_retry`** — forced to `yes` by Newspack
+6. **Filter: `wc_stripe_save_to_subs_checked`** — forced to `true` by Newspack
+7. **REST API: `/wp-json/wc/v1/subscriptions`** — used by modal checkout
+
+---
+
+## 10. Memberships Plugin Deep Dive (1.30.0 — 146,424 LOC)
+
+### Directory Structure
+```
+woocommerce-memberships/
+├── src/
+│   ├── Admin/                         # Admin UI
+│   │   ├── meta-boxes/                # 8 meta box classes + views
+│   │   └── modals/                    # 5 modal dialog classes
+│   ├── Emails/                        # 5 email classes
+│   ├── Frontend/                      # Checkout + frontend restriction
+│   ├── integrations/                  # Third-party integrations
+│   │   ├── subscriptions/             # 13 classes — CRITICAL link
+│   │   ├── bbpress/                   # Forum access
+│   │   ├── bookings/                  # Booking access
+│   │   ├── groups/                    # Group membership sync
+│   │   └── one-page-checkout/         # OPC integration
+│   ├── cli/                           # 5 WP-CLI command classes
+│   └── utilities/                     # CSV import/export, retroactive access
+├── templates/                         # Override templates
+├── lib/                               # Libraries
+├── i18n/                              # Translations
+└── assets/                            # CSS, JS
+```
+
+### Key Classes (85 total)
+
+| Class | Purpose |
+|-------|---------|
+| `WC_Memberships_Membership_Plans` | Plan CRUD and management |
+| `WC_Memberships_Membership_Plan` | Individual plan model |
+| `WC_Memberships_Membership_Plan_Rule` | Content restriction rule |
+| `WC_Memberships_Rules` | Rule engine (post, category, tag, taxonomy) |
+| `WC_Memberships_User_Membership` | User membership instance |
+| `WC_Memberships_User_Memberships` | User membership management |
+| `WC_Memberships_Capabilities` | Access capability mapping |
+| `WC_Memberships_User_Messages` | "You need a membership" messages |
+| `WC_Memberships_Member_Discounts` | Member-only pricing |
+| `WC_Memberships_Integration_Subscriptions` | Subscriptions ↔ Memberships bridge |
+| `WC_Memberships_Checkout` | Checkout flow for membership purchase |
+| `WC_Memberships_Import_Export_Handler` | Bulk import/export memberships |
+
+### Critical Integration: Subscriptions ↔ Memberships
+
+The `integrations/subscriptions/` directory contains 13 classes that bridge the two plugins:
+
+- When a subscription is created → activate linked membership
+- When a subscription is suspended → pause membership access
+- When a subscription is cancelled → end membership
+- When a subscription expires → expire membership
+- Subscription switching → membership plan switching
+- Free trials → trial membership access
+
+**This bridge is the heart of the NewsWoo paywall model.** It must be preserved exactly during the merge.
+
+### Newspack Compatibility Requirements
+
+1. **`Content_Gate` reads membership data** to decide if a reader has access
+2. **`Metering` checks membership status** for free article counting
+3. **`Access_Rules` depends on `WC_Memberships_Rules`** for per-post restriction
+4. **Data events fire on membership changes** → ESP contact sync
+5. **REST API: `/wp-json/wc/v3/memberships/`** — used by Newspack admin
+
+---
+
+## 11. Plugin Merge Order
+
+The recommended merge order accounts for dependencies:
+
+1. **Subscriptions** (Phase 4A) — merge first, it's the foundation
+2. **Subscriptions Gifting** (Phase 4D) — already partially inside Subscriptions
+3. **Memberships** (Phase 4B) — merge second, depends on Subscriptions bridge
+4. **Name Your Price** (Phase 4C) — merge last, smallest and most independent
+5. **Unified Plan Post Type** (Phase 4E) — build after all merges are stable
+6. **My Account Dashboard** (Phase 4F) — build on top of the merged core
+
+### Risk Assessment
+
+| Merge | Risk | Reason |
+|-------|------|--------|
+| Subscriptions → Core | HIGH | 155K LOC, deep WooCommerce hooks, Newspack depends on status constants |
+| Memberships → Core | MEDIUM | 146K LOC but well-abstracted, clear rule engine |
+| Subscriptions ↔ Memberships bridge | HIGH | 13 classes, must preserve exact lifecycle behavior |
+| Gifting → Core | LOW | 7K LOC, already in Subscriptions directory |
+| Name Your Price → Core | LOW | 10K LOC, minimal hook surface |
+
+---
+
+*Plugin analysis based on WooCommerce Subscriptions 9.2.0, Memberships 1.30.0, Name Your Price 3.8.2, Subscriptions Gifting 2.9.1*
+*Generated: 2026-09-19*
+
