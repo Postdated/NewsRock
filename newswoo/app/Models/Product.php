@@ -52,7 +52,7 @@ class Product extends Model
     |--------------------------------------------------------------------------
     */
 
-    public function meta(string $key, $default = null)
+    public function meta(string $key, mixed $default = null): mixed
     {
         $value = get_post_meta($this->ID, $key, true);
         return $value === '' ? $default : $value;

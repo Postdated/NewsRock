@@ -128,7 +128,7 @@ class Subscription extends Model
     /**
      * Get a meta value.
      */
-    public function meta(string $key, $default = null)
+    public function meta(string $key, mixed $default = null): mixed
     {
         $value = get_post_meta($this->ID, $key, true);
         return $value === '' ? $default : $value;
@@ -137,7 +137,7 @@ class Subscription extends Model
     /**
      * Set a meta value.
      */
-    public function setMeta(string $key, $value): void
+    public function setMeta(string $key, mixed $value): void
     {
         update_post_meta($this->ID, $key, $value);
     }
