@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "d2b3daedcf54ed95fe7d7a4baadd2fc4",
+    "content-hash": "ec23056d3e78c24046da6ad0dc4611f2",
     "packages": [
         {
             "name": "automattic/newspack-ads",
@@ -1030,6 +1030,38 @@
                 }
             ],
             "time": "2025-03-06T22:45:56+00:00"
+        },
+        {
+            "name": "elightup/slim-seo",
+            "version": "4.10.1",
+            "dist": {
+                "type": "path",
+                "url": "packages/slim-seo",
+                "reference": "f8578831bef14ecd581f592e3f7b45495d25f311"
+            },
+            "require": {
+                "composer/installers": "^2.0",
+                "php": ">=8.3"
+            },
+            "type": "wordpress-plugin",
+            "extra": {
+                "installer-name": "slim-seo"
+            },
+            "license": [
+                "GPL-3.0-or-later"
+            ],
+            "description": "Lightweight SEO for WordPress, using WordPress AI for meta generation",
+            "keywords": [
+                "bedrock",
+                "plugin",
+                "sage",
+                "seo",
+                "wordpress"
+            ],
+            "transport-options": {
+                "symlink": true,
+                "relative": true
+            }
         },
         {
             "name": "featuredimagefromurl/fifu-premium",
@@ -3911,6 +3943,38 @@
                 }
             ],
             "time": "2026-02-16T23:10:27+00:00"
+        },
+        {
+            "name": "onesignal/onesignal-free-web-push-notifications",
+            "version": "3.9.3",
+            "dist": {
+                "type": "path",
+                "url": "packages/onesignal-free-web-push-notifications",
+                "reference": "7d2ad2e6f3de7a27f420bb11bb1156e2f3cf2840"
+            },
+            "require": {
+                "composer/installers": "^2.0",
+                "php": ">=8.3"
+            },
+            "type": "wordpress-plugin",
+            "extra": {
+                "installer-name": "onesignal-free-web-push-notifications"
+            },
+            "license": [
+                "MIT"
+            ],
+            "description": "OneSignal web push notifications",
+            "keywords": [
+                "bedrock",
+                "newspack",
+                "plugin",
+                "push",
+                "wordpress"
+            ],
+            "transport-options": {
+                "symlink": true,
+                "relative": true
+            }
         },
         {
             "name": "oscarotero/env",
@@ -7709,6 +7773,37 @@
                 }
             ],
             "time": "2026-04-26T05:33:54+00:00"
+        },
+        {
+            "name": "wp-plugin/ai",
+            "version": "1.3.0",
+            "source": {
+                "type": "svn",
+                "url": "https://plugins.svn.wordpress.org/ai/",
+                "reference": "tags/1.3.0"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://downloads.wordpress.org/plugin/ai.1.3.0.zip"
+            },
+            "require": {
+                "composer/installers": "~1.0|~2.0"
+            },
+            "type": "wordpress-plugin",
+            "notification-url": "https://wp-packages.org/downloads",
+            "authors": [
+                {
+                    "name": "WordPress.org"
+                }
+            ],
+            "description": "AI features, experiments and capabilities for WordPress.",
+            "homepage": "https://github.com/WordPress/ai",
+            "support": {
+                "changelog": "https://wordpress.org/plugins/ai/#developers",
+                "issues": "https://wordpress.org/support/plugin/ai",
+                "source": "https://plugins.svn.wordpress.org/ai"
+            },
+            "time": "2026-08-18T21:10:55+00:00"
         },
         {
             "name": "wp-plugin/co-authors-plus",

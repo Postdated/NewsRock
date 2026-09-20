@@ -54,6 +54,18 @@ class Catalog {
                 'Author'      => 'Automattic',
                 'recommended' => true,
             ],
+            'slim-seo' => [
+                'Name'        => 'Slim SEO',
+                'Description' => 'Lightweight SEO. Meta AI uses the WordPress AI plugin.',
+                'Author'      => 'eLightUp',
+                'recommended' => true,
+            ],
+            'onesignal-free-web-push-notifications' => [
+                'Name'        => 'OneSignal Push Notifications',
+                'Description' => 'Web push notifications for readers.',
+                'Author'      => 'OneSignal',
+                'recommended' => false,
+            ],
             'prevent-direct-access' => [
                 'Name'        => 'Prevent Direct Access',
                 'Description' => 'Stop public and bot access to private media files.',

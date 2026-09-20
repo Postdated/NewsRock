@@ -34,3 +34,24 @@ test('pack admin uses plugin_dir_url for Sage/Bedrock assets', function () {
     expect($src)->not->toContain('WP_CONTENT_URL');
     expect($src)->toContain('newspack-bedrock-pack/v1/install');
 });
+
+test('slim seo and onesignal are composer wordpress-plugin packages', function () {
+    foreach (['slim-seo' => 'elightup/slim-seo', 'onesignal-free-web-push-notifications' => 'onesignal/onesignal-free-web-push-notifications'] as $dir => $name) {
+        $json = json_decode(file_get_contents(dirname(__DIR__) . '/packages/' . $dir . '/composer.json'), true);
+        expect($json['name'])->toBe($name);
+        expect($json['type'])->toBe('wordpress-plugin');
+        expect($json['require']['php'])->toBe('>=8.3');
+    }
+    $composer = json_decode(file_get_contents(dirname(__DIR__) . '/composer.json'), true);
+    expect($composer['require'])->toHaveKey('elightup/slim-seo');
+    expect($composer['require'])->toHaveKey('onesignal/onesignal-free-web-push-notifications');
+    expect($composer['require'])->toHaveKey('wp-plugin/ai');
+});
+
+test('slim seo uses wordpress ai capabilities', function () {
+    $src = file_get_contents(dirname(__DIR__) . '/packages/slim-seo/src/MetaTags/AI.php');
+    expect($src)->toContain('slim_seo_generate_ai');
+    expect($src)->toContain('wp_get_ability');
+    expect($src)->toContain('ai/meta-description');
+    expect($src)->not->toContain('api.openai.com');
+});

@@ -59,7 +59,10 @@
     "wp-plugin/co-authors-plus": "^4.1",
     "wp-theme/twentytwentyfive": "^1.0",
     "postdated/newspack-bedrock-pack": "1.1.0",
-    "bwps/prevent-direct-access": "2.8.9.1"
+    "bwps/prevent-direct-access": "2.8.9.1",
+    "elightup/slim-seo": "4.10.1",
+    "onesignal/onesignal-free-web-push-notifications": "3.9.3",
+    "wp-plugin/ai": "*"
   },
   "require-dev": {
     "laravel/pint": "^1.0",
