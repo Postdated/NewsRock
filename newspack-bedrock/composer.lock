@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "af2de79c71877c419285151a7026577d",
+    "content-hash": "d2b3daedcf54ed95fe7d7a4baadd2fc4",
     "packages": [
         {
             "name": "automattic/newspack-ads",
@@ -481,6 +481,37 @@
                 }
             ],
             "time": "2026-02-10T14:33:43+00:00"
+        },
+        {
+            "name": "bwps/prevent-direct-access",
+            "version": "2.8.9.1",
+            "dist": {
+                "type": "path",
+                "url": "packages/prevent-direct-access",
+                "reference": "4991070aaf0e9f30b4962e55f2b43c83ab62bf94"
+            },
+            "require": {
+                "composer/installers": "^2.0",
+                "php": ">=8.3"
+            },
+            "type": "wordpress-plugin",
+            "extra": {
+                "installer-name": "prevent-direct-access"
+            },
+            "license": [
+                "GPL-2.0-or-later"
+            ],
+            "description": "Prevent Direct Access to files and media",
+            "keywords": [
+                "bedrock",
+                "newspack",
+                "plugin",
+                "wordpress"
+            ],
+            "transport-options": {
+                "symlink": true,
+                "relative": true
+            }
         },
         {
             "name": "carbonphp/carbon-doctrine-types",
@@ -4041,6 +4072,44 @@
                 "bedrock",
                 "newspack",
                 "plugin",
+                "wordpress"
+            ],
+            "transport-options": {
+                "symlink": true,
+                "relative": true
+            }
+        },
+        {
+            "name": "postdated/newspack-bedrock-pack",
+            "version": "1.1.0",
+            "dist": {
+                "type": "path",
+                "url": "packages/newspack-bedrock-pack",
+                "reference": "e9388a7f6d2f0f9b496cbe8b1de58bb23b16816d"
+            },
+            "require": {
+                "composer/installers": "^2.0",
+                "php": ">=8.3"
+            },
+            "type": "wordpress-muplugin",
+            "extra": {
+                "installer-name": "newspack-bedrock-pack"
+            },
+            "autoload": {
+                "classmap": [
+                    "src/"
+                ]
+            },
+            "license": [
+                "GPL-2.0-or-later"
+            ],
+            "description": "Prompts to install bundled Newspack Bedrock companion plugins",
+            "homepage": "https://github.com/Postdated/NewsRock",
+            "keywords": [
+                "bedrock",
+                "newspack",
+                "plugin",
+                "sage",
                 "wordpress"
             ],
             "transport-options": {

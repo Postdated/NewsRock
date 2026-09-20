@@ -61,3 +61,22 @@ To auto-sync on every NewsWoo commit, add a Git post-commit hook:
 ./scripts/sync-to-monorepo.sh
 ```
 
+
+
+### `pull-from-newspack.sh` (from NewsRock)
+
+Pull the standalone [Postdated/Newspack](https://github.com/Postdated/Newspack) repo into `newspack-bedrock/`:
+
+```bash
+cd /path/to/NewsRock
+./scripts/pull-from-newspack.sh
+```
+
+### `sync-to-newsrock.sh` (from Newspack)
+
+Run from the Newspack repo after you commit there:
+
+```bash
+cd /path/to/Newspack
+./scripts/sync-to-newsrock.sh
+```
